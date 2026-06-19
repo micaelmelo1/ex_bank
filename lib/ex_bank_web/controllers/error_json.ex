@@ -18,4 +18,19 @@ defmodule ExBankWeb.ErrorJSON do
   def render(template, _assigns) do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
+
+  def error(%{changeset: changeset}) do
+    %{errors: translate_errors(changeset)}
+  end
+
+  defp translate_errors(changeset) do
+    changeset
+    |> Ecto.Changeset.traverse_errors(&translate_error/1)
+  end
+
+  defp translate_error({msg, opts}) do
+    Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+      opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+    end)
+  end
 end
