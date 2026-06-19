@@ -8,6 +8,26 @@ defmodule ExBankWeb.UsersJSON do
     }
   end
 
+  def delete(%{user: user}) do
+    %{
+      message: "User deleted successfully",
+      data: data(user)
+    }
+  end
+
+  def show(%{user: user}) do
+    %{
+      data: data(user)
+    }
+  end
+
+  def update(%{user: user}) do
+    %{
+      message: "User updated successfully",
+      data: data(user)
+    }
+  end
+
   defp data(%User{} = user) do
     %{
       id: user.id,

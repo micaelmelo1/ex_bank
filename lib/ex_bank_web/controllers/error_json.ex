@@ -19,6 +19,14 @@ defmodule ExBankWeb.ErrorJSON do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
 
+  def error(%{status: :not_found}) do
+    %{errors: %{detail: "Not Found"}}
+  end
+
+  def error(%{status: status}) do
+    %{errors: %{detail: status}}
+  end
+
   def error(%{changeset: changeset}) do
     %{errors: translate_errors(changeset)}
   end

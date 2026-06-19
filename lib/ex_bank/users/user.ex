@@ -4,7 +4,8 @@ defmodule ExBank.Users.User do
 
   alias Ecto.Changeset
 
-  @required_params [:name, :email, :password, :zipcode]
+  @required_params_create [:name, :email, :password, :zipcode]
+  @required_params_update [:name, :email, :zipcode]
 
   schema "users" do
     field :name, :string
@@ -16,14 +17,25 @@ defmodule ExBank.Users.User do
     timestamps()
   end
 
-  def changeset(user \\ %__MODULE__{}, params) do
+  def changeset(params) do
+    %__MODULE__{}
+    |> cast(params, @required_params_create)
+    |> do_validations(@required_params_create)
+    |> put_password_hash()
+  end
+
+  def changeset(user, params) do
     user
-    |> cast(params, @required_params)
-    |> validate_required(@required_params)
+    |> cast(params, @required_params_create)
+    |> do_validations(@required_params_update)
+  end
+
+  defp do_validations(changeset, fields) do
+    changeset
+    |> validate_required(fields)
     |> validate_format(:email, ~r/@/)
     |> validate_length(:password, min: 8)
     |> validate_length(:zipcode, is: 8)
-    |> put_password_hash()
   end
 
   defp put_password_hash(%Changeset{valid?: true, changes: %{password: password}} = changeset) do
