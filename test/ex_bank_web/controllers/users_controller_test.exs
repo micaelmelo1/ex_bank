@@ -94,7 +94,9 @@ defmodule ExBankWeb.UsersControllerTest do
       params: params,
       expected_response: expected_response
     } do
-      expect(ClientBehaviourMock, :call, fn "01001000" ->
+      zipcode = params["zipcode"]
+
+      expect(ClientBehaviourMock, :call, fn ^zipcode ->
         {:ok, expected_response}
       end)
 
