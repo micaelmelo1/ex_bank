@@ -11,6 +11,8 @@ defmodule ExBankWeb.Router do
     get "/", WelcomeController, :index
 
     resources "/users", UsersController, only: [:create, :show, :update, :delete]
+    resources "/accounts", AccountsController, only: [:create]
+    post "/accounts/transaction", AccountsController, :transaction
   end
 
   # Enable LiveDashboard in development

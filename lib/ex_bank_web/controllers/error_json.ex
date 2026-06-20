@@ -27,6 +27,10 @@ defmodule ExBankWeb.ErrorJSON do
     %{errors: %{detail: status}}
   end
 
+  def error(%{message: message}) do
+    %{errors: %{detail: message}}
+  end
+
   def error(%{changeset: changeset}) do
     %{errors: translate_errors(changeset)}
   end

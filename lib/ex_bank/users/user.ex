@@ -3,6 +3,7 @@ defmodule ExBank.Users.User do
   import Ecto.Changeset
 
   alias Ecto.Changeset
+  alias ExBank.Accounts.Account
 
   @required_params_create [:name, :email, :password, :zipcode]
   @required_params_update [:name, :email, :zipcode]
@@ -13,6 +14,7 @@ defmodule ExBank.Users.User do
     field :password_hash, :string
     field :email, :string
     field :zipcode, :string
+    has_one :account, Account
 
     timestamps()
   end
