@@ -1,6 +1,10 @@
 defmodule ExBank.ViaCep.Client do
+  alias ExBank.ViaCep.ClientBehaviour
+  @behaviour ClientBehaviour
+
   @default_url "https://viacep.com.br/ws"
 
+  @impl ClientBehaviour
   def call(url \\ @default_url, zipcode) do
     "#{url}/#{zipcode}/json"
     |> Req.get()

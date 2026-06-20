@@ -1,20 +1,17 @@
 defmodule ExBank.Users.Create do
   alias ExBank.Users.User
   alias ExBank.Repo
-  alias ExBank.ViaCep.Client
+  alias ExBank.ViaCep.Client, as: ViaCepClient
 
-  def call(params) do
-    changeset = User.changeset(params)
-
-    if changeset.valid? do
-      zipcode = Ecto.Changeset.get_field(changeset, :zipcode)
-
-      with {:ok, _} <- Client.call(zipcode),
-           {:ok, user} <- Repo.insert(changeset) do
-        {:ok, user}
-      end
-    else
-      {:error, changeset}
+  def call(%{"zipcode" => zipcode} = params) do
+    with {:ok, _result} <- client().call(zipcode) do
+      params
+      |> User.changeset()
+      |> Repo.insert()
     end
+  end
+
+  defp client() do
+    Application.get_env(:ex_bank, :via_cep_client, ViaCepClient)
   end
 end
