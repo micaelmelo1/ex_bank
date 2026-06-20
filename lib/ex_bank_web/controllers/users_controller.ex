@@ -4,6 +4,8 @@ defmodule ExBankWeb.UsersController do
   alias ExBank.Users
   alias Users.User
 
+  alias ExBankWeb.Token
+
   action_fallback ExBankWeb.FallbackController
 
   def create(conn, params) do
@@ -19,6 +21,16 @@ defmodule ExBankWeb.UsersController do
       conn
       |> put_status(:no_content)
       |> render(:delete, user: user)
+    end
+  end
+
+  def login(conn, params) do
+    with {:ok, %User{} = user} <- Users.login(params) do
+      token = Token.sign(user)
+
+      conn
+      |> put_status(:ok)
+      |> render(:login, token: token)
     end
   end
 

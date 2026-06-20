@@ -15,6 +15,13 @@ defmodule ExBankWeb.UsersJSON do
     }
   end
 
+  def login(%{token: token}) do
+    %{
+      message: "Login successful",
+      bearer: token
+    }
+  end
+
   def show(%{user: user}) do
     %{
       data: data(user)

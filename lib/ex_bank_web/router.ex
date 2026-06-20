@@ -5,12 +5,23 @@ defmodule ExBankWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug ExBankWeb.Plugs.Auth
+  end
+
   scope "/api", ExBankWeb do
     pipe_through :api
 
     get "/", WelcomeController, :index
 
-    resources "/users", UsersController, only: [:create, :show, :update, :delete]
+    post "/users/login", UsersController, :login
+    resources "/users", UsersController, only: [:create]
+  end
+
+  scope "/api", ExBankWeb do
+    pipe_through [:api, :auth]
+
+    resources "/users", UsersController, only: [:show, :update, :delete]
     resources "/accounts", AccountsController, only: [:create]
     post "/accounts/transaction", AccountsController, :transaction
   end

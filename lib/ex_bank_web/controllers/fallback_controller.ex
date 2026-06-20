@@ -22,6 +22,13 @@ defmodule ExBankWeb.FallbackController do
     |> render(:error, changeset: changeset)
   end
 
+  def call(conn, {:error, :unauthorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(json: ExBankWeb.ErrorJSON)
+    |> render(:error, status: :unauthorized)
+  end
+
   def call(conn, {:error, message}) do
     conn
     |> put_status(:bad_request)

@@ -23,6 +23,10 @@ defmodule ExBankWeb.ErrorJSON do
     %{errors: %{detail: "Not Found"}}
   end
 
+  def error(%{status: :unauthorized}) do
+    %{errors: %{detail: "Unauthorized"}}
+  end
+
   def error(%{status: status}) do
     %{errors: %{detail: status}}
   end
