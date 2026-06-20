@@ -3,6 +3,11 @@ defmodule ExBankWeb.AccountsControllerTest do
 
   alias ExBank.AccountsFixtures
 
+  setup %{conn: conn} do
+    user = AccountsFixtures.user_fixture()
+    {:ok, conn: authenticate_conn(conn, user)}
+  end
+
   describe "create/2" do
     test "successfully creates an account", %{conn: conn} do
       user = AccountsFixtures.user_fixture()

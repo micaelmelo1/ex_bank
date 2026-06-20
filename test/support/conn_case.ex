@@ -35,4 +35,10 @@ defmodule ExBankWeb.ConnCase do
     ExBank.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  def authenticate_conn(conn, user) do
+    token = ExBankWeb.Token.sign(user)
+
+    Plug.Conn.put_req_header(conn, "authorization", "Bearer #{token}")
+  end
 end

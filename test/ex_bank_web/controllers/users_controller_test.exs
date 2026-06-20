@@ -3,6 +3,7 @@ defmodule ExBankWeb.UsersControllerTest do
 
   import Mox
 
+  alias ExBank.AccountsFixtures
   alias ExBank.Users
   alias Users.User
   alias ExBank.ViaCep.ClientBehaviourMock
@@ -88,6 +89,61 @@ defmodule ExBankWeb.UsersControllerTest do
     end
   end
 
+  describe "login/2" do
+    test "successfully logs in and returns a token", %{
+      conn: conn,
+      params: params,
+      expected_response: expected_response
+    } do
+      expect(ClientBehaviourMock, :call, fn "01001000" ->
+        {:ok, expected_response}
+      end)
+
+      {:ok, %User{id: id}} = Users.create(params)
+
+      response =
+        conn
+        |> post(~p"/api/users/login", %{"id" => id, "password" => params["password"]})
+        |> json_response(:ok)
+
+      assert %{
+               "bearer" => token,
+               "message" => "Login successful"
+             } = response
+
+      assert is_binary(token)
+      assert {:ok, %{user_id: ^id}} = ExBankWeb.Token.verify(token)
+    end
+
+    test "returns unauthorized when password is invalid", %{
+      conn: conn,
+      params: params,
+      expected_response: expected_response
+    } do
+      expect(ClientBehaviourMock, :call, fn "01001000" ->
+        {:ok, expected_response}
+      end)
+
+      {:ok, %User{id: id}} = Users.create(params)
+
+      response =
+        conn
+        |> post(~p"/api/users/login", %{"id" => id, "password" => "wrong-password"})
+        |> json_response(:unauthorized)
+
+      assert %{"errors" => %{"detail" => "Unauthorized"}} = response
+    end
+
+    test "returns not_found when user does not exist", %{conn: conn} do
+      response =
+        conn
+        |> post(~p"/api/users/login", %{"id" => 999_999, "password" => "12345678"})
+        |> json_response(:not_found)
+
+      assert %{"errors" => %{"detail" => "Not Found"}} = response
+    end
+  end
+
   describe "delete/2" do
     test "successfully deletes an user", %{
       conn: conn,
@@ -100,11 +156,12 @@ defmodule ExBankWeb.UsersControllerTest do
         {:ok, expected_response}
       end)
 
-      {:ok, %User{id: id}} = Users.create(params)
+      {:ok, %User{} = user} = Users.create(params)
 
       response =
         conn
-        |> delete(~p"/api/users/#{id}")
+        |> authenticate_conn(user)
+        |> delete(~p"/api/users/#{user.id}")
         |> json_response(:no_content)
 
       assert %{
@@ -113,8 +170,11 @@ defmodule ExBankWeb.UsersControllerTest do
     end
 
     test "when there is no user with the given id, returns an error", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+
       response =
         conn
+        |> authenticate_conn(user)
         |> delete(~p"/api/users/1")
         |> json_response(:not_found)
 
