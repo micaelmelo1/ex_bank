@@ -1,17 +1,50 @@
 defmodule ExBankWeb.UsersControllerTest do
   use ExBankWeb.ConnCase, async: true
 
+  import Mox
+
   alias ExBank.Users
   alias Users.User
+  alias ExBank.ViaCep.ClientBehaviourMock
+
+  setup :verify_on_exit!
+
+  setup do
+    params = %{
+      "name" => "John Doe",
+      "email" => "john.doe@example.com",
+      "password" => "12345678",
+      "zipcode" => "01001000"
+    }
+
+    expected_response = %{
+      "bairro" => "Sé",
+      "cep" => "01001-000",
+      "complemento" => "lado ímpar",
+      "ddd" => "11",
+      "estado" => "São Paulo",
+      "gia" => "1004",
+      "ibge" => "3550308",
+      "localidade" => "São Paulo",
+      "logradouro" => "Praça da Sé",
+      "regiao" => "Sudeste",
+      "siafi" => "7107",
+      "uf" => "SP",
+      "unidade" => ""
+    }
+
+    {:ok, params: params, expected_response: expected_response}
+  end
 
   describe "create/2" do
-    test "successfully creates an user", %{conn: conn} do
-      params = %{
-        name: "John Doe",
-        email: "john.doe@example.com",
-        password: "12345678",
-        zipcode: "12345678"
-      }
+    test "successfully creates an user", %{
+      conn: conn,
+      params: params,
+      expected_response: expected_response
+    } do
+      expect(ClientBehaviourMock, :call, fn "01001000" ->
+        {:ok, expected_response}
+      end)
 
       response =
         conn
@@ -23,7 +56,7 @@ defmodule ExBankWeb.UsersControllerTest do
                  "email" => "john.doe@example.com",
                  "id" => _id,
                  "name" => "John Doe",
-                 "zipcode" => "12345678"
+                 "zipcode" => "01001000"
                },
                "message" => "User created successfully"
              } = response
@@ -31,11 +64,15 @@ defmodule ExBankWeb.UsersControllerTest do
 
     test "when there are invalid params, returns an error", %{conn: conn} do
       params = %{
-        name: "John Doe",
-        email: "john.doe@example.com",
-        password: "1",
-        zipcode: "12"
+        "name" => "John Doe",
+        "email" => "john.doe@example.com",
+        "password" => "123",
+        "zipcode" => "12"
       }
+
+      expect(ClientBehaviourMock, :call, fn "12" ->
+        {:ok, ""}
+      end)
 
       response =
         conn
@@ -52,13 +89,14 @@ defmodule ExBankWeb.UsersControllerTest do
   end
 
   describe "delete/2" do
-    test "successfully deletes an user", %{conn: conn} do
-      params = %{
-        name: "John Doe",
-        email: "john.doe@example.com",
-        password: "12345678",
-        zipcode: "12345678"
-      }
+    test "successfully deletes an user", %{
+      conn: conn,
+      params: params,
+      expected_response: expected_response
+    } do
+      expect(ClientBehaviourMock, :call, fn "01001000" ->
+        {:ok, expected_response}
+      end)
 
       {:ok, %User{id: id}} = Users.create(params)
 
